@@ -7,7 +7,7 @@ function App() {
     <Router>
       <GlobalHeader />
 
-      <main className="container mx-auto">
+      <main className="container mx-auto px-6 md:px-0">
         <Switch>
           <Route path="/" exact component={Home} />
         </Switch>
