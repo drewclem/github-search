@@ -24,7 +24,7 @@ const SearchUserCard = ({ user }) => {
 
         <div className="ml-6 flex justify-between items-center flex-grow">
           <div>
-            <p className="text-xl font-bold">{user.login}</p>
+            <p className="text-xl font-bold mb-2">{user.login}</p>
             <p>
               {followerCount} <span className="opacity-50">followers</span>
             </p>
