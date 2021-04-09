@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import SearchUserCard from '../components/search/SearchUserCard';
 
 const Home = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -82,27 +83,18 @@ const Home = () => {
               </svg>
             </button>
           )}
-        </div>
 
-        {searchResults?.length ? <div className="mt-4 opacity-50">{totalCount} results</div> : null}
+          {searchResults?.length ? (
+            <div className="mt-4 opacity-50">{totalCount} results</div>
+          ) : null}
+        </div>
       </form>
 
       <div>
         {searchResults?.length ? (
           <ul>
             {searchResults.map((user) => {
-              return (
-                <li>
-                  <a className="flex" href={user.html_url}>
-                    <div className="h-24 w-24 rounded-full overflow-hidden">
-                      <img src={user.avatar_url} alt={user.login} />
-                    </div>
-                    <div>
-                      <p>{user.login}</p>
-                    </div>
-                  </a>
-                </li>
-              );
+              return <SearchUserCard user={user} />;
             })}
           </ul>
         ) : (
