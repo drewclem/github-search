@@ -3,17 +3,19 @@ import React, { useState } from 'react';
 const Home = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
+  const [totalCount, setTotalCount] = useState();
 
   async function handleSearchRequest(e) {
     e.preventDefault();
 
-    const api = `https://api.github.com/search/users?q=${searchTerm}`;
+    const api = `https://api.github.com/search/users?q=${searchTerm}&per_page=25`;
 
     const response = await fetch(api);
 
     const rawResults = await response.json();
 
     setSearchResults(rawResults.items);
+    setTotalCount(rawResults.total_count);
   }
 
   function clearSearch() {
@@ -23,7 +25,7 @@ const Home = () => {
 
   return (
     <div className="max-w-xl mx-auto">
-      <form onSubmit={handleSearchRequest}>
+      <form className="mb-12" onSubmit={handleSearchRequest}>
         <label htmlFor="searchInput">
           <h1 className="text-2xl">A Github Search Tool</h1>
         </label>
@@ -81,10 +83,12 @@ const Home = () => {
             </button>
           )}
         </div>
+
+        {searchResults?.length ? <div className="mt-4 opacity-50">{totalCount} results</div> : null}
       </form>
 
       <div>
-        {searchResults ? (
+        {searchResults?.length ? (
           <ul>
             {searchResults.map((user) => {
               return (
