@@ -1,20 +1,41 @@
-import React, { useState } from 'react';
-import SearchUserCard from '../components/search/SearchUserCard';
+import React, { useEffect, useState } from 'react';
+import ReactPaginate from 'react-paginate';
+import SearchResultsList from '../components/search/SearchResultsList';
 
 const Home = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [totalCount, setTotalCount] = useState();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [numberOfPages, setNumberOfPages] = useState();
 
-  async function handleSearchRequest(e) {
+  useEffect(() => {
+    const pages = Math.ceil(totalCount / 25);
+
+    // Unauthenticated github requests only return the first 1000 results. This limits the pagination to match those 1000 returned items
+    if (pages > 40) {
+      setNumberOfPages(40);
+    } else {
+      setNumberOfPages(pages);
+    }
+  }, [totalCount]);
+
+  useEffect(() => {
+    if (searchTerm !== null) {
+      setSearchResults(searchResults);
+    }
+  }, [searchResults, searchTerm]);
+
+  async function initialSearchRequest(e, page) {
     e.preventDefault();
 
-    const api = `https://api.github.com/search/users?q=${searchTerm}&per_page=25`;
+    const api = `https://api.github.com/search/users?q=${searchTerm}&per_page=25&page=${currentPage}`;
 
     const response = await fetch(api);
 
     const rawResults = await response.json();
 
+    setCurrentPage(1);
     setSearchResults(rawResults.items);
     setTotalCount(rawResults.total_count);
   }
@@ -24,11 +45,24 @@ const Home = () => {
     setSearchResults([]);
   }
 
+  const handlePageClick = async (page) => {
+    console.log(page);
+    setCurrentPage(page);
+
+    const api = `https://api.github.com/search/users?q=${searchTerm}&per_page=25&page=${page}`;
+
+    const response = await fetch(api);
+
+    const rawResults = await response.json();
+
+    setSearchResults(rawResults.items);
+  };
+
   return (
     <div className="max-w-xl mx-auto">
-      <form className="mb-12" onSubmit={handleSearchRequest}>
+      <form className="mb-12" onSubmit={initialSearchRequest}>
         <label htmlFor="searchInput">
-          <h1 className="text-2xl">A Github Search Tool</h1>
+          <h1 className="text-2xl">Github User Search</h1>
         </label>
 
         <div className="relative">
@@ -85,21 +119,26 @@ const Home = () => {
           )}
 
           {searchResults?.length ? (
-            <div className="mt-4 opacity-50">{totalCount} results</div>
+            <div className="flex justify-between mt-4 opacity-50">
+              <p>{totalCount} results</p>
+              <p>Page {currentPage}</p>
+            </div>
           ) : null}
         </div>
       </form>
 
       <div>
-        {searchResults?.length ? (
-          <ul>
-            {searchResults.map((user) => {
-              return <SearchUserCard user={user} />;
-            })}
-          </ul>
-        ) : (
-          <div>Your results will show here.</div>
-        )}
+        <SearchResultsList results={searchResults} totalCount={totalCount} />
+
+        {searchResults?.length && numberOfPages > 1 ? (
+          <ReactPaginate
+            pageCount={numberOfPages}
+            marginPagesDisplayed={1}
+            pageRangeDisplayed={5}
+            containerClassName={'pagination'}
+            onPageChange={(e) => handlePageClick(e.selected + 1)}
+          />
+        ) : null}
       </div>
     </div>
   );

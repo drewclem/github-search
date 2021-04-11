@@ -16,7 +16,7 @@ const SearchUserCard = ({ user }) => {
   }, [user.followers_url]);
 
   return (
-    <li className="mb-12">
+    <li className="mb-12" key={user.login}>
       <a className="flex bg-white shadow hover:shadow-md p-4 rounded-lg" href={user.html_url}>
         <div className="h-24 w-24 rounded-full overflow-hidden">
           <img src={user.avatar_url} alt={user.login} />
