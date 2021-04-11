@@ -1,22 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
 const SearchUserCard = ({ user }) => {
-  const [followerCount, setFollowerCount] = useState();
-
-  useEffect(() => {
-    async function getFollowerCount() {
-      const response = await fetch(user.followers_url);
-
-      const rawFollowers = await response.json();
-
-      setFollowerCount(rawFollowers.length);
-    }
-
-    getFollowerCount();
-  }, [user.followers_url]);
-
   return (
-    <li className="mb-12" key={user.login}>
+    <li className="mb-12">
       <a className="flex bg-white shadow hover:shadow-md p-4 rounded-lg" href={user.html_url}>
         <div className="h-24 w-24 rounded-full overflow-hidden">
           <img src={user.avatar_url} alt={user.login} />
@@ -26,7 +12,7 @@ const SearchUserCard = ({ user }) => {
           <div>
             <p className="text-xl font-bold mb-2">{user.login}</p>
             <p>
-              {followerCount} <span className="opacity-50">followers</span>
+              {user.followers} <span className="opacity-50">followers</span>
             </p>
             <p>{user.starred_url.length}</p>
           </div>
@@ -34,7 +20,7 @@ const SearchUserCard = ({ user }) => {
           <div className="text-tdl-red">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              class="h-6 w-6"
+              className="h-6 w-6"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"

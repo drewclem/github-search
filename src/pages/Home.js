@@ -26,17 +26,38 @@ const Home = () => {
     }
   }, [searchResults, searchTerm]);
 
-  async function initialSearchRequest(e, page) {
+  async function initialSearchRequest(e) {
     e.preventDefault();
 
-    const api = `https://api.github.com/search/users?q=${searchTerm}&per_page=25&page=${currentPage}`;
+    const response = await fetch(
+      `https://api.github.com/search/users?q=${searchTerm}&per_page=25&page=1`,
+      {
+        headers: { Authorization: `token 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` },
+      }
+    );
 
-    const response = await fetch(api);
+    const rawResults = await response?.json();
 
-    const rawResults = await response.json();
+    const individualUserResponses = await Promise.all(
+      rawResults.items.map(({ url }) => fetch(url))
+    );
+
+    const individualUserInfo = await Promise.all(
+      individualUserResponses.map((userResponse) => userResponse.json())
+    );
+
+    const users = rawResults.items.map((user, index) => {
+      const fullUserInfo = {
+        ...user,
+        ...individualUserInfo[index],
+      };
+
+      return fullUserInfo;
+    });
+
+    setSearchResults(users);
 
     setCurrentPage(1);
-    setSearchResults(rawResults.items);
     setTotalCount(rawResults.total_count);
   }
 
@@ -46,24 +67,53 @@ const Home = () => {
   }
 
   const handlePageClick = async (page) => {
-    console.log(page);
     setCurrentPage(page);
 
-    const api = `https://api.github.com/search/users?q=${searchTerm}&per_page=25&page=${page}`;
-
-    const response = await fetch(api);
+    const response = await fetch(
+      `https://api.github.com/search/users?q=${searchTerm}&per_page=25&page=${page}`,
+      {
+        headers: { Authorization: `token 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` },
+      }
+    );
 
     const rawResults = await response.json();
 
-    setSearchResults(rawResults.items);
+    const individualUserResponses = await Promise.all(
+      rawResults.items.map(({ url }) => fetch(url))
+    );
+
+    const individualUserInfo = await Promise.all(
+      individualUserResponses.map((userResponse) => userResponse.json())
+    );
+
+    const users = rawResults.items.map((user, index) => {
+      const fullUserInfo = {
+        ...user,
+        ...individualUserInfo[index],
+      };
+
+      return fullUserInfo;
+    });
+
+    setSearchResults(users);
   };
 
   return (
     <div className="max-w-xl mx-auto">
       <form className="mb-12" onSubmit={initialSearchRequest}>
-        <label htmlFor="searchInput">
-          <h1 className="text-2xl">Github User Search</h1>
-        </label>
+        <div className="flex justify-between items-start">
+          <label htmlFor="searchInput">
+            <h1 className="text-2xl">Github User Search</h1>
+          </label>
+
+          <button
+            className="opacity-50 hover:opacity-100 focus:opacity-100 bg-gray-200 hover:bg-gray-300 py-1 px-2 transition duration-150 ease-in-out"
+            type="button"
+            onClick={clearSearch}
+          >
+            Clear Search
+          </button>
+        </div>
 
         <div className="relative">
           <input
@@ -73,50 +123,26 @@ const Home = () => {
             value={searchTerm}
           />
 
-          {!searchResults?.length ? (
-            <button
-              className="absolute right-0 opacity-50 hover:opacity-100 focus:opacity-100 p-2 mt-1 mr-1 rounded-full transform transition duration-150 ease-in-out bg-tdl-blue text-tdl-red"
-              type="submit"
+          <button
+            className="absolute right-0 opacity-50 hover:opacity-100 focus:opacity-100 p-2 mt-2 mr-2 rounded-full transform transition duration-150 ease-in-out bg-tdl-blue text-tdl-red"
+            type="submit"
+          >
+            <span className="sr-only">Submit Search</span>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-4 w-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
             >
-              <span className="sr-only">Submit Search</span>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
-            </button>
-          ) : (
-            <button
-              className="absolute right-0 opacity-50 hover:opacity-100 focus:opacity-100 p-2 mt-1 mr-1 rounded-full transform transition duration-150 ease-in-out bg-tdl-blue text-tdl-red"
-              type="button"
-              onClick={clearSearch}
-            >
-              <span className="sr-only">Clear Search</span>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
-          )}
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+          </button>
 
           {searchResults?.length ? (
             <div className="flex justify-between mt-4 opacity-50">

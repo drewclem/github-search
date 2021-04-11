@@ -8,7 +8,7 @@ const SearchResultsList = ({ results, totalCount }) => {
         <>
           <ul className="mb-20">
             {results.map((user) => {
-              return <SearchUserCard user={user} />;
+              return <SearchUserCard user={user} key={user.id} />;
             })}
           </ul>
         </>
