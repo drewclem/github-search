@@ -41,7 +41,7 @@ const Home = () => {
 
           {!searchResults?.length ? (
             <button
-              className="absolute right-0 opacity-50 hover:opacity-100 focus:opacity-100 p-2 mt-1 mr-1 bg-gray-200 rounded-full transform transition duration-150 ease-in-out bg-tdl-blue text-tdl-red"
+              className="absolute right-0 opacity-50 hover:opacity-100 focus:opacity-100 p-2 mt-1 mr-1 rounded-full transform transition duration-150 ease-in-out bg-tdl-blue text-tdl-red"
               type="submit"
             >
               <span className="sr-only">Submit Search</span>
@@ -62,7 +62,7 @@ const Home = () => {
             </button>
           ) : (
             <button
-              className="absolute right-0 opacity-50 hover:opacity-100 focus:opacity-100 p-2 mt-1 mr-1 bg-gray-200 rounded-full transform transition duration-150 ease-in-out bg-tdl-blue text-tdl-red"
+              className="absolute right-0 opacity-50 hover:opacity-100 focus:opacity-100 p-2 mt-1 mr-1 rounded-full transform transition duration-150 ease-in-out bg-tdl-blue text-tdl-red"
               type="button"
               onClick={clearSearch}
             >
