@@ -1,21 +1,63 @@
-import React, { useState } from 'react';
-import SearchUserCard from '../components/search/SearchUserCard';
+import React, { useEffect, useState } from 'react';
+import ReactPaginate from 'react-paginate';
+import SearchResultsList from '../components/search/SearchResultsList';
 
 const Home = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [totalCount, setTotalCount] = useState();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [numberOfPages, setNumberOfPages] = useState();
 
-  async function handleSearchRequest(e) {
+  useEffect(() => {
+    const pages = Math.ceil(totalCount / 25);
+
+    // Unauthenticated github requests only return the first 1000 results. This limits the pagination to match those 1000 returned items
+    if (pages > 40) {
+      setNumberOfPages(40);
+    } else {
+      setNumberOfPages(pages);
+    }
+  }, [totalCount]);
+
+  useEffect(() => {
+    if (searchTerm !== null) {
+      setSearchResults(searchResults);
+    }
+  }, [searchResults, searchTerm]);
+
+  async function initialSearchRequest(e) {
     e.preventDefault();
 
-    const api = `https://api.github.com/search/users?q=${searchTerm}&per_page=25`;
+    const response = await fetch(
+      `https://api.github.com/search/users?q=${searchTerm}&per_page=25&page=1`,
+      {
+        headers: { Authorization: `token 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` },
+      }
+    );
 
-    const response = await fetch(api);
+    const rawResults = await response?.json();
 
-    const rawResults = await response.json();
+    const individualUserResponses = await Promise.all(
+      rawResults.items.map(({ url }) => fetch(url))
+    );
 
-    setSearchResults(rawResults.items);
+    const individualUserInfo = await Promise.all(
+      individualUserResponses.map((userResponse) => userResponse.json())
+    );
+
+    const users = rawResults.items.map((user, index) => {
+      const fullUserInfo = {
+        ...user,
+        ...individualUserInfo[index],
+      };
+
+      return fullUserInfo;
+    });
+
+    setSearchResults(users);
+
+    setCurrentPage(1);
     setTotalCount(rawResults.total_count);
   }
 
@@ -24,12 +66,56 @@ const Home = () => {
     setSearchResults([]);
   }
 
+  const handlePageClick = async (page) => {
+    setCurrentPage(page);
+
+    const response = await fetch(
+      `https://api.github.com/search/users?q=${searchTerm}&per_page=25&page=${page}`,
+      {
+        headers: { Authorization: `token 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` },
+      }
+    );
+
+    const rawResults = await response.json();
+
+    const individualUserResponses = await Promise.all(
+      rawResults.items.map(({ url }) => fetch(url))
+    );
+
+    const individualUserInfo = await Promise.all(
+      individualUserResponses.map((userResponse) => userResponse.json())
+    );
+
+    const users = rawResults.items.map((user, index) => {
+      const fullUserInfo = {
+        ...user,
+        ...individualUserInfo[index],
+      };
+
+      return fullUserInfo;
+    });
+
+    console.log({ users });
+
+    setSearchResults(users);
+  };
+
   return (
     <div className="max-w-xl mx-auto">
-      <form className="mb-12" onSubmit={handleSearchRequest}>
-        <label htmlFor="searchInput">
-          <h1 className="text-2xl">A Github Search Tool</h1>
-        </label>
+      <form className="mb-12" onSubmit={initialSearchRequest}>
+        <div className="flex justify-between items-start">
+          <label htmlFor="searchInput">
+            <h1 className="text-2xl">Github User Search</h1>
+          </label>
+
+          <button
+            className="opacity-50 hover:opacity-100 focus:opacity-100 bg-gray-200 hover:bg-gray-300 py-1 px-2 transition duration-150 ease-in-out"
+            type="button"
+            onClick={clearSearch}
+          >
+            Clear Search
+          </button>
+        </div>
 
         <div className="relative">
           <input
@@ -39,67 +125,48 @@ const Home = () => {
             value={searchTerm}
           />
 
-          {!searchResults?.length ? (
-            <button
-              className="absolute right-0 opacity-50 hover:opacity-100 focus:opacity-100 p-2 mt-1 mr-1 rounded-full transform transition duration-150 ease-in-out bg-tdl-blue text-tdl-red"
-              type="submit"
+          <button
+            className="absolute right-0 opacity-50 hover:opacity-100 focus:opacity-100 p-2 mt-2 mr-2 rounded-full transform transition duration-150 ease-in-out bg-tdl-blue text-tdl-red"
+            type="submit"
+          >
+            <span className="sr-only">Submit Search</span>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-4 w-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
             >
-              <span className="sr-only">Submit Search</span>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
-            </button>
-          ) : (
-            <button
-              className="absolute right-0 opacity-50 hover:opacity-100 focus:opacity-100 p-2 mt-1 mr-1 rounded-full transform transition duration-150 ease-in-out bg-tdl-blue text-tdl-red"
-              type="button"
-              onClick={clearSearch}
-            >
-              <span className="sr-only">Clear Search</span>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
-          )}
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+          </button>
 
           {searchResults?.length ? (
-            <div className="mt-4 opacity-50">{totalCount} results</div>
+            <div className="flex justify-between mt-4 opacity-50">
+              <p>{totalCount} results</p>
+              <p>Page {currentPage}</p>
+            </div>
           ) : null}
         </div>
       </form>
 
       <div>
-        {searchResults?.length ? (
-          <ul>
-            {searchResults.map((user) => {
-              return <SearchUserCard user={user} />;
-            })}
-          </ul>
-        ) : (
-          <div>Your results will show here.</div>
-        )}
+        <SearchResultsList results={searchResults} totalCount={totalCount} />
+
+        {searchResults?.length && numberOfPages > 1 ? (
+          <ReactPaginate
+            pageCount={numberOfPages}
+            marginPagesDisplayed={1}
+            pageRangeDisplayed={5}
+            containerClassName={'pagination'}
+            onPageChange={(e) => handlePageClick(e.selected + 1)}
+          />
+        ) : null}
       </div>
     </div>
   );

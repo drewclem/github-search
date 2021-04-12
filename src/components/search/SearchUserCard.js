@@ -1,20 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
 const SearchUserCard = ({ user }) => {
-  const [followerCount, setFollowerCount] = useState();
-
-  useEffect(() => {
-    async function getFollowerCount() {
-      const response = await fetch(user.followers_url);
-
-      const rawFollowers = await response.json();
-
-      setFollowerCount(rawFollowers.length);
-    }
-
-    getFollowerCount();
-  }, [user.followers_url]);
-
   return (
     <li className="mb-12">
       <a className="flex bg-white shadow hover:shadow-md p-4 rounded-lg" href={user.html_url}>
@@ -22,19 +8,23 @@ const SearchUserCard = ({ user }) => {
           <img src={user.avatar_url} alt={user.login} />
         </div>
 
-        <div className="ml-6 flex justify-between items-center flex-grow">
+        <div className="ml-6 flex justify-between flex-grow">
           <div>
             <p className="text-xl font-bold mb-2">{user.login}</p>
             <p>
-              {followerCount} <span className="opacity-50">followers</span>
+              {user.followers}{' '}
+              <span className="opacity-50">follower{user.followers > 1 ? 's' : ''}</span>
             </p>
-            <p>{user.starred_url.length}</p>
+            <p>
+              {user.public_repos}
+              <span className="opacity-50"> public repo{user.public_repos > 1 ? 's' : ''}</span>
+            </p>
           </div>
 
           <div className="text-tdl-red">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              class="h-6 w-6"
+              className="h-6 w-6"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
