@@ -8,13 +8,17 @@ const SearchUserCard = ({ user }) => {
           <img src={user.avatar_url} alt={user.login} />
         </div>
 
-        <div className="ml-6 flex justify-between items-center flex-grow">
+        <div className="ml-6 flex justify-between flex-grow">
           <div>
             <p className="text-xl font-bold mb-2">{user.login}</p>
             <p>
-              {user.followers} <span className="opacity-50">followers</span>
+              {user.followers}{' '}
+              <span className="opacity-50">follower{user.followers > 1 ? 's' : ''}</span>
             </p>
-            <p>{user.starred_url.length}</p>
+            <p>
+              {user.public_repos}
+              <span className="opacity-50"> public repo{user.public_repos > 1 ? 's' : ''}</span>
+            </p>
           </div>
 
           <div className="text-tdl-red">

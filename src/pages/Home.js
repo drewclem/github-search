@@ -32,7 +32,7 @@ const Home = () => {
     const response = await fetch(
       `https://api.github.com/search/users?q=${searchTerm}&per_page=25&page=1`,
       {
-        headers: { Authorization: `token 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` },
+        headers: { Authorization: `token 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` },
       }
     );
 
@@ -72,7 +72,7 @@ const Home = () => {
     const response = await fetch(
       `https://api.github.com/search/users?q=${searchTerm}&per_page=25&page=${page}`,
       {
-        headers: { Authorization: `token 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` },
+        headers: { Authorization: `token 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` },
       }
     );
 
@@ -94,6 +94,8 @@ const Home = () => {
 
       return fullUserInfo;
     });
+
+    console.log({ users });
 
     setSearchResults(users);
   };
