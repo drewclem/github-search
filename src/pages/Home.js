@@ -30,10 +30,7 @@ const Home = () => {
     e.preventDefault();
 
     const response = await fetch(
-      `https://api.github.com/search/users?q=${searchTerm}&per_page=25&page=1`,
-      {
-        headers: { Authorization: `token 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` },
-      }
+      `https://api.github.com/search/users?q=${searchTerm}&per_page=25&page=1`
     );
 
     const rawResults = await response?.json();
@@ -70,10 +67,7 @@ const Home = () => {
     setCurrentPage(page);
 
     const response = await fetch(
-      `https://api.github.com/search/users?q=${searchTerm}&per_page=25&page=${page}`,
-      {
-        headers: { Authorization: `token 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` },
-      }
+      `https://api.github.com/search/users?q=${searchTerm}&per_page=25&page=${page}`
     );
 
     const rawResults = await response.json();
