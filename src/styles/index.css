@@ -1,0 +1,52 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  @apply font-bold text-tdl-blue;
+}
+
+h1,
+h2,
+h3 {
+  @apply mb-4;
+}
+
+h4,
+h5,
+h6 {
+  @apply mb-2;
+}
+
+button {
+  @apply rounded-md;
+}
+
+.pagination {
+  @apply flex flex-row justify-center;
+}
+
+.pagination li {
+  @apply inline;
+}
+
+.pagination li a {
+  @apply border border-gray-300 p-3;
+}
+
+.pagination .selected a {
+  @apply bg-tdl-red border-tdl-blue;
+}
+
+.pagination .selected a:focus {
+  @apply rounded-none;
+}
+
+.pagination .disabled {
+  @apply opacity-25 pointer-events-none;
+}
